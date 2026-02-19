@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:5001',
+  apiBaseUrl: 'https://ebanfxbackend.onrender.com',
   firebase: {
     apiKey: 'AIzaSyB0ZSfztmOD_-aGVYnRKq2U9keEjCR20To',
     authDomain: 'ebanfx-db4fb.firebaseapp.com',
