@@ -7,13 +7,14 @@ import { provideAuth, getAuth } from '@angular/fire/auth';
 import { AppComponent } from './app/app.component';
 import { appRoutes } from './app/app.routes';
 import { authInterceptor } from './app/core/interceptors/auth.interceptor';
+import { environment } from './environments/environment';
 
 bootstrapApplication(AppComponent, {
   providers: [
     provideRouter(appRoutes),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideIonicAngular(),
-    provideFirebaseApp(() => initializeApp({ apiKey: 'demo', authDomain: 'demo.firebaseapp.com', projectId: 'demo' })),
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth())
   ]
 }).catch((err) => console.error(err));
