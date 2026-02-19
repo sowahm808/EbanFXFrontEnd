@@ -1,0 +1,16 @@
+<ion-header><ion-toolbar><ion-title>Orders</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <ion-button fill="outline" expand="block" (click)="refresh()">Refresh</ion-button>
+  @if(orders().length===0){<div class="empty-state">No orders yet.</div>}
+  <ion-list>
+    @for(order of orders(); track order.id){
+      <ion-item button (click)="open(order)">
+        <ion-label>
+          <h3>{{ order.beneficiary.name }} ({{ order.beneficiary.country }})</h3>
+          <p>GHS {{ order.amountGhs }} → USD {{ order.amountUsd }}</p>
+          <p>{{ order.status }} • {{ formatted(order.createdAt) }}</p>
+        </ion-label>
+      </ion-item>
+    }
+  </ion-list>
+</ion-content>

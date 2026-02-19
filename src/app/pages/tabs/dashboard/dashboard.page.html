@@ -1,0 +1,24 @@
+<ion-header><ion-toolbar><ion-title>Dashboard</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <p class="status-pill">KYC: {{ (userService.profileSignal()?.kycStatus || 'not_submitted') }}</p>
+  <ion-button expand="block" fill="outline" (click)="goToKyc()">Verify KYC</ion-button>
+
+  <ion-card>
+    <ion-card-header><ion-card-title>Create Quote</ion-card-title></ion-card-header>
+    <ion-card-content>
+      <form [formGroup]="quoteForm" (ngSubmit)="createQuote()">
+        <ion-item><ion-label position="stacked">Amount (GHS)</ion-label><ion-input type="number" formControlName="amountGhs" /></ion-item>
+        <ion-button expand="block" type="submit" class="ion-margin-top">Create Quote</ion-button>
+      </form>
+      @if (quote()) {
+        <div>
+          <p>Rate: {{ quote()?.customerRate }}</p>
+          <p>USD: {{ quote()?.amountUsd }}</p>
+          <p>Fee (GHS): {{ quote()?.feeGhs }}</p>
+          <p>Expires in: {{ remainingSeconds() }}s</p>
+        </div>
+        <ion-button expand="block" [disabled]="remainingSeconds() === 0" (click)="createOrder()">Create Order</ion-button>
+      }
+    </ion-card-content>
+  </ion-card>
+</ion-content>
