@@ -1,4 +1,25 @@
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
 body { margin: 0; font-family: Inter, Arial, sans-serif; }
 .empty-state { text-align: center; color: var(--ion-color-medium); padding: 2rem 1rem; }
 .status-pill { display: inline-block; padding: 0.3rem 0.7rem; border-radius: 999px; background: #eef2ff; font-size: 0.8rem; }
 .inline-error { color: var(--ion-color-danger); font-size: 0.8rem; margin-top: 0.2rem; }
+
+ion-item {
+  --background: var(--ion-item-background, var(--ion-background-color, #fff));
+  --color: var(--ion-text-color, #1f2937);
+}
+
+ion-input {
+  --color: var(--ion-text-color, #1f2937);
+}
