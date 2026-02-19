@@ -1,0 +1,11 @@
+<ion-header><ion-toolbar><ion-title>Register</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <ion-item><ion-label position="stacked">Email</ion-label><ion-input formControlName="email" type="email" /></ion-item>
+    @if(form.controls.email.touched && form.controls.email.invalid){<div class="inline-error">Valid email required.</div>}
+    <ion-item><ion-label position="stacked">Password</ion-label><ion-input formControlName="password" type="password" /></ion-item>
+    @if(form.controls.password.touched && form.controls.password.invalid){<div class="inline-error">Min 6 characters.</div>}
+    <ion-button type="submit" expand="block" class="ion-margin-top">Create account</ion-button>
+  </form>
+  <ion-button fill="clear" routerLink="/auth/login">Already registered? Login</ion-button>
+</ion-content>

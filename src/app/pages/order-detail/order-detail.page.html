@@ -1,0 +1,15 @@
+<ion-header><ion-toolbar><ion-title>Order Details</ion-title></ion-toolbar></ion-header>
+<ion-content class="ion-padding">
+  @if(order()){
+    <p>Status: <span class="status-pill">{{ order()?.status }}</span></p>
+    <p>Settlement Tx: {{ order()?.settlementTxHash || 'N/A' }}</p>
+    <ion-button fill="outline" expand="block" (click)="refresh()">Refresh</ion-button>
+    <ion-button expand="block" color="danger" [disabled]="order()?.status === 'PROCESSING' || order()?.status === 'SENT' || order()?.status === 'COMPLETED'" (click)="cancel()">Cancel</ion-button>
+    <h3>Timeline</h3>
+    <ion-list>
+      @for(step of order()?.timeline || []; track step.timestamp){
+        <ion-item><ion-label>{{ step.status }} • {{ date(step.timestamp) }} {{ step.note || '' }}</ion-label></ion-item>
+      }
+    </ion-list>
+  }
+</ion-content>
