@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private static readonly tokenStorageKey = 'ebanfx_id_token';
   private readonly auth = inject(Auth);
   private readonly userSignal = signal<User | null>(null);
   readonly currentUser$: Observable<User | null> = authState(this.auth);
@@ -13,23 +14,39 @@ export class AuthService {
     this.currentUser$.subscribe((user) => this.userSignal.set(user));
   }
 
-  login(email: string, password: string): Promise<void> {
-    return signInWithEmailAndPassword(this.auth, email, password).then(() => undefined);
+  async login(email: string, password: string): Promise<void> {
+    const credential = await signInWithEmailAndPassword(this.auth, email, password);
+    const idToken = await credential.user.getIdToken();
+    this.storeToken(idToken);
   }
 
-  register(email: string, password: string): Promise<void> {
-    return createUserWithEmailAndPassword(this.auth, email, password).then(() => undefined);
+  async register(email: string, password: string): Promise<void> {
+    const credential = await createUserWithEmailAndPassword(this.auth, email, password);
+    const idToken = await credential.user.getIdToken();
+    this.storeToken(idToken);
   }
 
-  logout(): Promise<void> {
-    return signOut(this.auth);
+  async logout(): Promise<void> {
+    await signOut(this.auth);
+    this.clearStoredToken();
   }
 
   async getIdToken(): Promise<string | null> {
     const user = this.auth.currentUser;
-    if (!user) {
-      return null;
+    if (user) {
+      const idToken = await user.getIdToken();
+      this.storeToken(idToken);
+      return idToken;
     }
-    return user.getIdToken();
+
+    return localStorage.getItem(AuthService.tokenStorageKey);
+  }
+
+  private storeToken(token: string) {
+    localStorage.setItem(AuthService.tokenStorageKey, token);
+  }
+
+  private clearStoredToken() {
+    localStorage.removeItem(AuthService.tokenStorageKey);
   }
 }
