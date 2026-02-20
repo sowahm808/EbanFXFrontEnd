@@ -6,7 +6,15 @@
     <ion-item><ion-label position="stacked">Phone</ion-label><ion-input formControlName="phone" /></ion-item>
     <ion-item><ion-label position="stacked">National ID</ion-label><ion-input formControlName="nationalId" /></ion-item>
     <ion-item><ion-label position="stacked">Address</ion-label><ion-input formControlName="address" /></ion-item>
-    <ion-item><ion-label position="stacked">Document Upload Placeholder</ion-label><ion-input formControlName="documentPlaceholder" /></ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Identity Document</ion-label>
+      <input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="onDocumentSelected($event)" />
+      @if (selectedDocumentName) {
+      <p>Selected: {{ selectedDocumentName }}</p>
+      }
+    </ion-item>
+
     <ion-button type="submit" expand="block" class="ion-margin-top">Submit KYC</ion-button>
   </form>
 </ion-content>

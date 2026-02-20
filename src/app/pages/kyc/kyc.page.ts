@@ -14,14 +14,39 @@ export class KycPage {
   private loadingCtrl = inject(LoadingController);
   private toastCtrl = inject(ToastController);
 
+  selectedDocumentName = '';
+
   readonly form = this.fb.nonNullable.group({
     fullName: ['', Validators.required],
     dateOfBirth: ['', Validators.required],
     phone: ['', Validators.required],
     nationalId: ['', Validators.required],
     address: ['', Validators.required],
-    documentPlaceholder: ['Document upload pending', Validators.required]
+    documentPlaceholder: ['', Validators.required]
   });
+
+  async onDocumentSelected(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (!file) {
+      this.selectedDocumentName = '';
+      this.form.controls.documentPlaceholder.setValue('');
+      return;
+    }
+
+    this.selectedDocumentName = file.name;
+
+    try {
+      const encodedFile = await this.readAsDataUrl(file);
+      this.form.controls.documentPlaceholder.setValue(encodedFile);
+    } catch {
+      this.form.controls.documentPlaceholder.setValue('');
+      this.selectedDocumentName = '';
+      const toast = await this.toastCtrl.create({ message: 'Failed to read document.', duration: 1800, color: 'danger' });
+      await toast.present();
+    }
+  }
 
   async submit() {
     if (this.form.invalid) return;
@@ -38,6 +63,15 @@ export class KycPage {
         const toast = await this.toastCtrl.create({ message: 'KYC submission failed.', duration: 1800, color: 'danger' });
         await toast.present();
       }
+    });
+  }
+
+  private readAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
     });
   }
 }
