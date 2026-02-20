@@ -44,21 +44,20 @@ export class AuthService {
   }
 
   hasStoredAuthToken(): boolean {
-    return !!this.auth.currentUser && !!this.getValidStoredToken();
+    return !!this.getValidStoredToken();
   }
 
   async getIdToken(): Promise<string | null> {
     await this.authReady;
 
     const user = this.auth.currentUser;
-    if (!user) {
-      this.clearStoredToken();
-      return null;
+    if (user) {
+      const idToken = await user.getIdToken();
+      this.storeToken(idToken);
+      return idToken;
     }
 
-    const idToken = await user.getIdToken();
-    this.storeToken(idToken);
-    return idToken;
+    return this.getValidStoredToken();
   }
 
   async getFreshIdToken(): Promise<string | null> {
