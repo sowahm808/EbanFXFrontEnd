@@ -13,10 +13,6 @@ export class AuthService {
   constructor() {
     this.currentUser$.subscribe((user) => {
       this.userSignal.set(user);
-
-      if (!user) {
-        this.clearStoredToken();
-      }
     });
   }
 
@@ -40,8 +36,7 @@ export class AuthService {
   async getIdToken(): Promise<string | null> {
     const user = this.auth.currentUser;
     if (!user) {
-      this.clearStoredToken();
-      return null;
+      return this.getStoredToken();
     }
 
     const idToken = await user.getIdToken();
@@ -55,5 +50,9 @@ export class AuthService {
 
   private clearStoredToken() {
     localStorage.removeItem(AuthService.tokenStorageKey);
+  }
+
+  private getStoredToken(): string | null {
+    return localStorage.getItem(AuthService.tokenStorageKey);
   }
 }
