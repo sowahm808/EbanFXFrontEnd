@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { BehaviorSubject, tap } from 'rxjs';
+import { BehaviorSubject, catchError, of, tap } from 'rxjs';
 import { ApiService } from './api.service';
 import { CurrentUserProfile } from '../models/user.model';
 
@@ -17,6 +17,10 @@ export class UserService {
       tap((profile) => {
         this.profileSubject.next(profile);
         this.profileSignalInternal.set(profile);
+      }),
+      catchError(() => {
+        this.clear();
+        return of(null);
       })
     );
   }
