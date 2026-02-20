@@ -33,6 +33,10 @@ export class AuthService {
     this.clearStoredToken();
   }
 
+  clearStoredAuth(): void {
+    this.clearStoredToken();
+  }
+
   async getIdToken(): Promise<string | null> {
     const user = this.auth.currentUser;
     if (!user) {
