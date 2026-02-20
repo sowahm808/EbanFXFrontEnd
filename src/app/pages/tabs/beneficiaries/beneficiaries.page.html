@@ -1,9 +1,9 @@
 <ion-header><ion-toolbar><ion-title>Beneficiaries</ion-title></ion-toolbar></ion-header>
 <ion-content class="ion-padding">
   <form [formGroup]="form" (ngSubmit)="submit()">
-    <ion-item><ion-label position="stacked">Name</ion-label><ion-input formControlName="name" /></ion-item>
-    <ion-item><ion-label position="stacked">Country</ion-label><ion-input formControlName="country" /></ion-item>
-    <ion-item><ion-label position="stacked">TRON USDT Address</ion-label><ion-input formControlName="walletAddress" /></ion-item>
+    <ion-item><ion-label position="stacked">Name</ion-label><ion-input formControlName="name"></ion-input></ion-item>
+    <ion-item><ion-label position="stacked">Country</ion-label><ion-input formControlName="country"></ion-input></ion-item>
+    <ion-item><ion-label position="stacked">TRON USDT Address</ion-label><ion-input formControlName="walletAddress"></ion-input></ion-item>
     <ion-button type="submit" expand="block" class="ion-margin-top">Create Beneficiary</ion-button>
   </form>
   @if(items().length === 0){<div class="empty-state">No beneficiaries yet.</div>}
