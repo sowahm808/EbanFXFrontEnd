@@ -7,7 +7,7 @@
     <ion-card-header><ion-card-title>Create Quote</ion-card-title></ion-card-header>
     <ion-card-content>
       <form [formGroup]="quoteForm" (ngSubmit)="createQuote()">
-        <ion-item><ion-label position="stacked">Amount (GHS)</ion-label><ion-input type="number" formControlName="amountGhs" /></ion-item>
+        <ion-item><ion-label position="stacked">Amount (GHS)</ion-label><ion-input type="number" formControlName="amountGhs"></ion-input></ion-item>
         <ion-button expand="block" type="submit" class="ion-margin-top">Create Quote</ion-button>
       </form>
       @if (quote()) {
