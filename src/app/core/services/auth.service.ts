@@ -11,7 +11,13 @@ export class AuthService {
   readonly currentUserSignal = computed(() => this.userSignal());
 
   constructor() {
-    this.currentUser$.subscribe((user) => this.userSignal.set(user));
+    this.currentUser$.subscribe((user) => {
+      this.userSignal.set(user);
+
+      if (!user) {
+        this.clearStoredToken();
+      }
+    });
   }
 
   async login(email: string, password: string): Promise<void> {
@@ -33,13 +39,14 @@ export class AuthService {
 
   async getIdToken(): Promise<string | null> {
     const user = this.auth.currentUser;
-    if (user) {
-      const idToken = await user.getIdToken();
-      this.storeToken(idToken);
-      return idToken;
+    if (!user) {
+      this.clearStoredToken();
+      return null;
     }
 
-    return localStorage.getItem(AuthService.tokenStorageKey);
+    const idToken = await user.getIdToken();
+    this.storeToken(idToken);
+    return idToken;
   }
 
   private storeToken(token: string) {
