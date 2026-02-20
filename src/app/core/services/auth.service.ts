@@ -37,6 +37,10 @@ export class AuthService {
     this.clearStoredToken();
   }
 
+  hasStoredAuthToken(): boolean {
+    return !!this.getStoredToken();
+  }
+
   async getIdToken(): Promise<string | null> {
     const user = this.auth.currentUser;
     if (!user) {
