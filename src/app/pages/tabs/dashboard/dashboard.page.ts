@@ -21,7 +21,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private destroy$ = new Subject<void>();
 
-  readonly quoteForm = this.fb.nonNullable.group({ amountGhs: [0, [Validators.required, Validators.min(1)]] });
+  readonly quoteForm = this.fb.nonNullable.group({ amountGhs: ['', [Validators.required]] });
   readonly quote = signal<Quote | null>(null);
   readonly remainingSeconds = signal(0);
 
@@ -32,9 +32,17 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   async createQuote() {
     if (this.quoteForm.invalid) return;
+    const amountGhs = Number(this.quoteForm.controls.amountGhs.value);
+    if (!Number.isFinite(amountGhs) || amountGhs < 1) {
+      const toast = await this.toastCtrl.create({ message: 'Enter an amount greater than 0.', duration: 1800, color: 'warning' });
+      await toast.present();
+      return;
+    }
+
     const loading = await this.loadingCtrl.create({ message: 'Fetching quote...' });
     await loading.present();
-    this.api.createQuote(this.quoteForm.getRawValue()).subscribe({
+
+    this.api.createQuote({ amountGhs }).subscribe({
       next: async (quote) => {
         this.quote.set(quote);
         this.tickCountdown();
