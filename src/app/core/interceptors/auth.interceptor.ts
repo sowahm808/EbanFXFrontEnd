@@ -11,6 +11,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
+  const handleUnauthorized = (error: unknown) =>
+    from(authService.waitForAuthReady()).pipe(
+      switchMap(() => {
+        const hasSession = !!authService.currentUserSignal() || authService.hasStoredAuthToken();
+        if (!hasSession) {
+          authService.clearStoredAuth();
+          void router.navigateByUrl('/auth/login');
+        }
+
+        return throwError(() => error);
+      })
+    );
+
   return from(authService.getIdToken()).pipe(
     switchMap((token) => {
       const cloned = token
@@ -25,9 +38,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         return from(authService.getFreshIdToken()).pipe(
           switchMap((freshToken) => {
             if (!freshToken) {
-              authService.clearStoredAuth();
-              void router.navigateByUrl('/auth/login');
-              return throwError(() => error);
+              return handleUnauthorized(error);
             }
 
             const retriedRequest = req.clone({
@@ -37,17 +48,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
             return next(retriedRequest);
           }),
-          catchError((retryError) => {
-            authService.clearStoredAuth();
-            void router.navigateByUrl('/auth/login');
-            return throwError(() => retryError);
-          })
+          catchError((retryError) => handleUnauthorized(retryError))
         );
       }
 
       if (isApi401) {
-        authService.clearStoredAuth();
-        void router.navigateByUrl('/auth/login');
+        return handleUnauthorized(error);
       }
 
       return throwError(() => error);
