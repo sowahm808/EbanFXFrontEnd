@@ -44,7 +44,7 @@ export class AuthService {
   }
 
   hasStoredAuthToken(): boolean {
-    return !!this.getStoredToken();
+    return !!this.getValidStoredToken();
   }
 
   async getIdToken(): Promise<string | null> {
@@ -52,7 +52,7 @@ export class AuthService {
 
     const user = this.auth.currentUser;
     if (!user) {
-      return this.getStoredToken();
+      return this.getValidStoredToken();
     }
 
     const idToken = await user.getIdToken();
@@ -83,5 +83,41 @@ export class AuthService {
 
   private getStoredToken(): string | null {
     return localStorage.getItem(AuthService.tokenStorageKey);
+  }
+
+  private getValidStoredToken(): string | null {
+    const token = this.getStoredToken();
+    if (!token) {
+      return null;
+    }
+
+    if (this.isTokenExpired(token)) {
+      this.clearStoredToken();
+      return null;
+    }
+
+    return token;
+  }
+
+  private isTokenExpired(token: string): boolean {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return true;
+    }
+
+    try {
+      const payloadBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payloadJson = atob(payloadBase64);
+      const payload = JSON.parse(payloadJson) as { exp?: number };
+      const exp = payload.exp;
+
+      if (!exp || !Number.isFinite(exp)) {
+        return true;
+      }
+
+      return exp * 1000 <= Date.now();
+    } catch {
+      return true;
+    }
   }
 }
