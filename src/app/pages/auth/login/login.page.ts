@@ -23,17 +23,48 @@ export class LoginPage {
 
   async submit() {
     if (this.form.invalid) return;
+    this.blurFocusedElement();
+
     const loading = await this.loadingCtrl.create({ message: 'Signing in...' });
     await loading.present();
+
     try {
       const { email, password } = this.form.getRawValue();
       await this.authService.login(email, password);
-      await this.router.navigateByUrl('/tabs/dashboard', { replaceUrl: true });
-    } catch {
-      const toast = await this.toastCtrl.create({ message: 'Login failed. Check credentials.', duration: 2200, color: 'danger' });
-      await toast.present();
-    } finally {
       await loading.dismiss();
+      await this.router.navigateByUrl('/tabs/dashboard', { replaceUrl: true });
+    } catch (error) {
+      await loading.dismiss();
+      const toast = await this.toastCtrl.create({
+        message: this.getLoginErrorMessage(error),
+        duration: 2800,
+        color: 'danger'
+      });
+      await toast.present();
+    }
+  }
+
+  private blurFocusedElement(): void {
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
+  }
+
+  private getLoginErrorMessage(error: unknown): string {
+    const firebaseCode = (error as { code?: string } | null)?.code;
+    switch (firebaseCode) {
+      case 'auth/invalid-credential':
+      case 'auth/invalid-login-credentials':
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+        return 'Login failed. Check your email/password and try again.';
+      case 'auth/too-many-requests':
+        return 'Too many failed attempts. Please wait and try again.';
+      case 'auth/unauthorized-domain':
+        return 'This domain is not authorized in Firebase Auth. Add it in Firebase Console > Authentication > Settings > Authorized domains.';
+      default:
+        return 'Login failed. Please try again.';
     }
   }
 }
