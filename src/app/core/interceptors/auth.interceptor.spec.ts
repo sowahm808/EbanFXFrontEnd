@@ -1,4 +1,4 @@
-import { HttpHandlerFn, HttpRequest } from '@angular/common/http';
+import { HttpHandlerFn, HttpRequest, HttpResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
@@ -17,7 +17,7 @@ describe('authInterceptor', () => {
     const req = new HttpRequest('GET', '/me');
     const next: HttpHandlerFn = (request) => {
       expect(request.headers.get('Authorization')).toBe('Bearer abc-token');
-      return of({} as never);
+      return of(new HttpResponse({ status: 200 }));
     };
 
     TestBed.runInInjectionContext(() => {
