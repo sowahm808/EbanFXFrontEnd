@@ -6,14 +6,9 @@ import { AuthService } from '../services/auth.service';
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
+
   return from(authService.waitForAuthReady()).pipe(
     switchMap(() => authService.currentUser$),
-    map((user) => {
-      if (user || authService.hasStoredAuthToken()) {
-        return true;
-      }
-
-      return router.createUrlTree(['/auth/login']);
-    })
+    map((user) => user ? true : router.createUrlTree(['/auth/login']))
   );
 };
