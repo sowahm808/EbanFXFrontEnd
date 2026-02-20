@@ -52,6 +52,17 @@ export class AuthService {
     return idToken;
   }
 
+  async getFreshIdToken(): Promise<string | null> {
+    const user = this.auth.currentUser;
+    if (!user) {
+      return null;
+    }
+
+    const idToken = await user.getIdToken(true);
+    this.storeToken(idToken);
+    return idToken;
+  }
+
   private storeToken(token: string) {
     localStorage.setItem(AuthService.tokenStorageKey, token);
   }
