@@ -1,12 +1,13 @@
 import { CanActivateFn, Router } from '@angular/router';
 import { inject } from '@angular/core';
-import { map } from 'rxjs';
+import { from, map, switchMap } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  return authService.currentUser$.pipe(
+  return from(authService.waitForAuthReady()).pipe(
+    switchMap(() => authService.currentUser$),
     map((user) => {
       if (user || authService.hasStoredAuthToken()) {
         return true;
