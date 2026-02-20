@@ -26,21 +26,31 @@ export class RegisterPage {
 
   async submit() {
     if (this.form.invalid) return;
+    this.blurFocusedElement();
+
     const loading = await this.loadingCtrl.create({ message: 'Creating account...' });
     await loading.present();
+
     try {
       const { email, password } = this.form.getRawValue();
       await this.authService.register(email, password);
+      await loading.dismiss();
       await this.router.navigateByUrl('/kyc');
     } catch (error) {
+      await loading.dismiss();
       const toast = await this.toastCtrl.create({
         message: this.getRegistrationErrorMessage(error),
         duration: 2800,
         color: 'danger'
       });
       await toast.present();
-    } finally {
-      await loading.dismiss();
+    }
+  }
+
+  private blurFocusedElement(): void {
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur();
     }
   }
 
@@ -55,6 +65,8 @@ export class RegisterPage {
         return 'Please enter a valid email address.';
       case 'auth/weak-password':
         return 'Password is too weak. Use at least 6 characters.';
+      case 'auth/unauthorized-domain':
+        return 'This domain is not authorized in Firebase Auth. Add it in Firebase Console > Authentication > Settings > Authorized domains.';
       default:
         return 'Registration failed. Please try again.';
     }
