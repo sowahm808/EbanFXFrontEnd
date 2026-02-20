@@ -28,7 +28,7 @@ export class LoginPage {
     try {
       const { email, password } = this.form.getRawValue();
       await this.authService.login(email, password);
-      await this.router.navigateByUrl('/tabs/dashboard');
+      await this.router.navigateByUrl('/tabs/dashboard', { replaceUrl: true });
     } catch {
       const toast = await this.toastCtrl.create({ message: 'Login failed. Check credentials.', duration: 2200, color: 'danger' });
       await toast.present();
