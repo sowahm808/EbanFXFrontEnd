@@ -107,7 +107,8 @@ export class AuthService {
 
     try {
       const payloadBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-      const payloadJson = atob(payloadBase64);
+      const padding = '='.repeat((4 - (payloadBase64.length % 4)) % 4);
+      const payloadJson = atob(`${payloadBase64}${padding}`);
       const payload = JSON.parse(payloadJson) as { exp?: number };
       const exp = payload.exp;
 
