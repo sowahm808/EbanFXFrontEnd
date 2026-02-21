@@ -21,17 +21,37 @@ export class AuthService {
     });
   }
 
-  async login(email: string, password: string): Promise<void> {
-    const credential = await signInWithEmailAndPassword(this.auth, email, password);
-    const idToken = await credential.user.getIdToken();
-    this.storeToken(idToken);
-  }
+  // async login(email: string, password: string): Promise<void> {
+  //   const credential = await signInWithEmailAndPassword(this.auth, email, password);
+  //   const idToken = await credential.user.getIdToken();
+  //   this.storeToken(idToken);
+  // }
 
-  async register(email: string, password: string): Promise<void> {
-    const credential = await createUserWithEmailAndPassword(this.auth, email, password);
-    const idToken = await credential.user.getIdToken();
-    this.storeToken(idToken);
-  }
+  // async register(email: string, password: string): Promise<void> {
+  //   const credential = await createUserWithEmailAndPassword(this.auth, email, password);
+  //   const idToken = await credential.user.getIdToken();
+  //   this.storeToken(idToken);
+  // }
+
+  async login(email: string, password: string): Promise<void> {
+  const credential = await signInWithEmailAndPassword(this.auth, email, password);
+
+  // Ensure auth state is fully ready (prevents early interceptor calls with null user)
+  await this.authReady;
+
+  // Force-refresh token (important if backend expects latest claims / avoids stale token edge cases)
+  const idToken = await credential.user.getIdToken(true);
+
+  this.storeToken(idToken);
+}
+
+async register(email: string, password: string): Promise<void> {
+  const credential = await createUserWithEmailAndPassword(this.auth, email, password);
+  await this.authReady;
+  const idToken = await credential.user.getIdToken(true);
+  this.storeToken(idToken);
+}
+
 
   async logout(): Promise<void> {
     await signOut(this.auth);
