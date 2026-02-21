@@ -1,7 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Auth, User, authState, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
-import { firstValueFrom, take } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -10,10 +9,10 @@ export class AuthService {
   private readonly userSignal = signal<User | null>(null);
   readonly currentUser$: Observable<User | null> = authState(this.auth);
   readonly currentUserSignal = computed(() => this.userSignal());
-  private readonly authReady = firstValueFrom(this.currentUser$.pipe(take(1)));
+  private readonly authReady = this.auth.authStateReady();
 
   waitForAuthReady(): Promise<User | null> {
-    return this.authReady;
+    return this.authReady.then(() => this.auth.currentUser);
   }
 
   constructor() {
