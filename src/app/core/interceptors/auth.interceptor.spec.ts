@@ -79,6 +79,37 @@ describe('authInterceptor', () => {
     });
   });
 
+  it('redirects to login without calling API when token is missing', (done) => {
+    const clearStoredAuth = jasmine.createSpy('clearStoredAuth');
+    const authService = createAuthServiceStub({
+      getIdToken: () => Promise.resolve(null),
+      clearStoredAuth
+    });
+    const navigateByUrl = jasmine.createSpy('navigateByUrl');
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: authService },
+        { provide: Router, useValue: { navigateByUrl } }
+      ]
+    });
+
+    const req = new HttpRequest('GET', `${environment.apiBaseUrl}/orders`);
+    const next = jasmine.createSpy('next').and.returnValue(of(new HttpResponse({ status: 200 })));
+
+    TestBed.runInInjectionContext(() => {
+      authInterceptor(req, next).subscribe({
+        next: () => fail('expected error response'),
+        error: () => {
+          expect(next).not.toHaveBeenCalled();
+          expect(clearStoredAuth).toHaveBeenCalled();
+          expect(navigateByUrl).toHaveBeenCalledWith('/auth/login');
+          done();
+        }
+      });
+    });
+  });
+
   it('clears auth and redirects to login on 401 from API after refresh retry fails', (done) => {
     const clearStoredAuth = jasmine.createSpy('clearStoredAuth');
     const getFreshIdToken = jasmine.createSpy('getFreshIdToken').and.returnValue(Promise.resolve('fresh-token'));

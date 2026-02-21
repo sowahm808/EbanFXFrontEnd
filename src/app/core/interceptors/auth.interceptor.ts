@@ -26,6 +26,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return from(authService.getIdToken()).pipe(
     switchMap((token) => {
+      const isApiRequest = req.url.startsWith(environment.apiBaseUrl);
+      if (isApiRequest && !token) {
+        return handleUnauthorized({ status: 401, url: req.url });
+      }
+
       const cloned = token
         ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
         : req;
