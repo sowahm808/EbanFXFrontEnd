@@ -1,17 +1,35 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { IonButton, IonContent, IonHeader, IonInput, IonItem, IonLabel, IonTitle, IonToolbar, LoadingController, ToastController } from '@ionic/angular/standalone';
+import {
+  IonButton,
+  IonContent,
+  IonHeader,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonTitle,
+  IonToolbar,
+  LoadingController,
+  ToastController
+} from '@ionic/angular/standalone';
+import { firstValueFrom } from 'rxjs'; // ✅ ADD THIS
 import { AuthService } from '../../../core/services/auth.service';
+import { UserService } from '../../../core/services/user.service';
 
 @Component({
   standalone: true,
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonLabel, IonInput, IonButton, ReactiveFormsModule, RouterLink],
+  imports: [
+    IonHeader, IonToolbar, IonTitle, IonContent,
+    IonItem, IonLabel, IonInput, IonButton,
+    ReactiveFormsModule, RouterLink
+  ],
   templateUrl: './login.page.html'
 })
 export class LoginPage {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private userService = inject(UserService);
   private router = inject(Router);
   private loadingCtrl = inject(LoadingController);
   private toastCtrl = inject(ToastController);
@@ -30,7 +48,25 @@ export class LoginPage {
 
     try {
       const { email, password } = this.form.getRawValue();
+
+      // 1) Login to Firebase
       await this.authService.login(email, password);
+
+      // 2) Warm backend session (/me)
+      const me = await firstValueFrom(this.userService.refreshMe());
+
+      // If /me failed (returns null), stop and show message
+      if (!me) {
+        await loading.dismiss();
+        const toast = await this.toastCtrl.create({
+          message: 'Signed in, but backend rejected the token. Fix server Firebase Admin credentials (service account / project mismatch).',
+          duration: 3500,
+          color: 'danger'
+        });
+        await toast.present();
+        return;
+      }
+
       await loading.dismiss();
       await this.router.navigateByUrl('/tabs/dashboard', { replaceUrl: true });
     } catch (error) {
@@ -46,9 +82,7 @@ export class LoginPage {
 
   private blurFocusedElement(): void {
     const activeElement = document.activeElement;
-    if (activeElement instanceof HTMLElement) {
-      activeElement.blur();
-    }
+    if (activeElement instanceof HTMLElement) activeElement.blur();
   }
 
   private getLoginErrorMessage(error: unknown): string {
